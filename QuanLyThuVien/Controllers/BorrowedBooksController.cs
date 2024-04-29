@@ -23,34 +23,61 @@ namespace QuanLyThuVien.Controllers
 
         // GET: api/BorrowedBooks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BorrowedBook>>> GetBorrowedBook()
+        public async Task<ActionResult<IEnumerable<BorrowedBookDTO>>> GetBorrowedBook()
         {
-            return await _context.BorrowedBook.ToListAsync();
+            var borrowedBooks = await _context.BorrowedBook
+                .Include(b => b.Book)
+                .Select(bb => new BorrowedBookDTO
+                {
+                    BorrowedBookID = bb.BorrowedBookID,
+                    BorrowingID = bb.BorrowingID,
+                    BookID = bb.BookID,
+                })
+                .ToListAsync();
+
+            return Ok(borrowedBooks);
         }
 
         // GET: api/BorrowedBooks/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BorrowedBook>> GetBorrowedBook(int id)
+        public async Task<ActionResult<BorrowedBookDTO>> GetBorrowedBook(int id)
         {
-            var borrowedBook = await _context.BorrowedBook.FindAsync(id);
+            var borrowedBookDTO = await _context.BorrowedBook
+                .Include(b => b.Book)
+                .Where(bb => bb.BorrowedBookID == id)
+                .Select(bb => new BorrowedBookDTO
+                {
+                    BorrowedBookID = bb.BorrowedBookID,
+                    BorrowingID = bb.BorrowingID,
+                    BookID = bb.BookID,
+                })
+                .FirstOrDefaultAsync();
 
+            if (borrowedBookDTO == null)
+            {
+                return NotFound();
+            }
+
+            return borrowedBookDTO;
+        }
+
+        // PUT: api/BorrowedBooks/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBorrowedBook(int id, BorrowedBookDTO borrowedBookDTO)
+        {
+            if (id != borrowedBookDTO.BorrowedBookID)
+            {
+                return BadRequest();
+            }
+
+            var borrowedBook = await _context.BorrowedBook.FindAsync(id);
             if (borrowedBook == null)
             {
                 return NotFound();
             }
 
-            return borrowedBook;
-        }
-
-        // PUT: api/BorrowedBooks/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBorrowedBook(int id, BorrowedBook borrowedBook)
-        {
-            if (id != borrowedBook.BorrowedBookID)
-            {
-                return BadRequest();
-            }
+            borrowedBook.BorrowingID = borrowedBookDTO.BorrowingID;
+            borrowedBook.BookID = borrowedBookDTO.BookID;
 
             _context.Entry(borrowedBook).State = EntityState.Modified;
 
@@ -74,14 +101,21 @@ namespace QuanLyThuVien.Controllers
         }
 
         // POST: api/BorrowedBooks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<BorrowedBook>> PostBorrowedBook(BorrowedBook borrowedBook)
+        public async Task<ActionResult<BorrowedBookDTO>> PostBorrowedBook(BorrowedBookDTO borrowedBookDTO)
         {
+            var borrowedBook = new BorrowedBook
+            {
+                BorrowingID = borrowedBookDTO.BorrowingID,
+                BookID = borrowedBookDTO.BookID
+            };
+
             _context.BorrowedBook.Add(borrowedBook);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBorrowedBook", new { id = borrowedBook.BorrowedBookID }, borrowedBook);
+            borrowedBookDTO.BorrowedBookID = borrowedBook.BorrowedBookID;
+
+            return CreatedAtAction("GetBorrowedBook", new { id = borrowedBook.BorrowedBookID }, borrowedBookDTO);
         }
 
         // DELETE: api/BorrowedBooks/5
@@ -99,10 +133,39 @@ namespace QuanLyThuVien.Controllers
 
             return NoContent();
         }
+        [HttpGet("Borrowing/{borrowingId}")]
+        public async Task<ActionResult<IEnumerable<BorrowedBookDTO>>> GetBorrowedBooksByBorrowingId(int borrowingId)
+        {
+            var borrowedBooks = await _context.BorrowedBook
+                .Include(bb => bb.Book)  // Optionally include Book details if needed
+                .Where(bb => bb.BorrowingID == borrowingId)
+                .Select(bb => new BorrowedBookDTO
+                {
+                    BorrowedBookID = bb.BorrowedBookID,
+                    BorrowingID = bb.BorrowingID,
+                    BookID = bb.BookID,
+                    // Add more properties from the Book if needed
+                })
+                .ToListAsync();
+
+            if (!borrowedBooks.Any())
+            {
+                return NotFound(new { message = $"No borrowed books found for borrowing ID {borrowingId}." });
+            }
+
+            return Ok(borrowedBooks);
+        }
 
         private bool BorrowedBookExists(int id)
         {
             return _context.BorrowedBook.Any(e => e.BorrowedBookID == id);
+        }
+        public class BorrowedBookDTO
+        {
+            public int BorrowedBookID { get; set; }
+            public int BorrowingID { get; set; }
+            public int BookID { get; set; }
+            // You can add details from the Book or Borrowing here if needed
         }
     }
 }

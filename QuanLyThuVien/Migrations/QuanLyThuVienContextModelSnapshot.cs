@@ -36,7 +36,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasKey("AuthorID");
 
-                    b.ToTable("Author");
+                    b.ToTable("Author", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.Book", b =>
@@ -77,7 +77,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasIndex("GenreID");
 
-                    b.ToTable("Book");
+                    b.ToTable("Book", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.BorrowedBook", b =>
@@ -100,7 +100,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasIndex("BorrowingID");
 
-                    b.ToTable("BorrowedBook");
+                    b.ToTable("BorrowedBook", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.Borrowing", b =>
@@ -128,7 +128,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Borrowing");
+                    b.ToTable("Borrowing", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.Genre", b =>
@@ -145,7 +145,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasKey("GenreID");
 
-                    b.ToTable("Genre");
+                    b.ToTable("Genre", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.User", b =>
@@ -170,7 +170,7 @@ namespace QuanLyThuVien.Migrations
 
                     b.HasKey("UserID");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien.Models.Book", b =>
