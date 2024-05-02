@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien.Data;
 using QuanLyThuVien.Models;
 
-// Data Transfer Object (DTO) for Borrowing
+
 public class BorrowingDto
 {
     public int BorrowingID { get; set; }
@@ -193,6 +193,103 @@ namespace QuanLyThuVien.Controllers
             {
                 await _context.SaveChangesAsync();
                 return NoContent(); // Bạn cũng có thể trả về thông tin phiếu mượn đã cập nhật nếu cần
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BorrowingExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+        [HttpPut("{id}/ReturnedAwaitingApproval")]
+        public async Task<IActionResult> MarkReturnedAwaitingApproval(int id)
+        {
+            var borrowing = await _context.Borrowing.FindAsync(id);
+            if (borrowing == null)
+            {
+                return NotFound();
+            }
+
+            // Update the status to "Waiting for Return Approval"
+            borrowing.Status = "Đang chờ phê duyệt trả"; // Or an appropriate status in your language
+            borrowing.ReturnDate = DateTime.Now; // Record the date when the book was returned
+
+            _context.Entry(borrowing).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return NoContent(); // You could also return the updated borrowing record if needed
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BorrowingExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        [HttpPut("{id}/ConfirmBorrowing")]
+        public async Task<IActionResult> ConfirmBorrowing(int id)
+        {
+            var borrowing = await _context.Borrowing.FindAsync(id);
+            if (borrowing == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật trạng thái mượn sách
+            borrowing.Status = "Đã mượn"; // hoặc một trạng thái thích hợp khác
+            _context.Entry(borrowing).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return NoContent(); // hoặc bạn có thể trả về phiếu mượn đã cập nhật
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BorrowingExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        // PUT: api/Borrowings/{id}/ConfirmReturning
+        [HttpPut("{id}/ConfirmReturning")]
+        public async Task<IActionResult> ConfirmReturning(int id)
+        {
+            var borrowing = await _context.Borrowing.FindAsync(id);
+            if (borrowing == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật trạng thái trả sách
+            borrowing.Status = "Returning Confirmed"; // hoặc một trạng thái thích hợp khác
+            borrowing.ReturnDate = DateTime.Now;
+
+            _context.Entry(borrowing).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return NoContent(); // hoặc bạn có thể trả về phiếu mượn đã cập nhật
             }
             catch (DbUpdateConcurrencyException)
             {
