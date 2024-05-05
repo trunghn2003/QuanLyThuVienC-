@@ -95,6 +95,76 @@ namespace QuanLyThuVien.Controllers
 
             return NoContent();
         }
+        [HttpPut("AddToCart/{id}")]
+        public async Task<IActionResult> AddToCart(int id)
+        {
+            var book = await _context.Book.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound(new { message = "Không tìm thấy sách." });
+            }
+
+            // Kiểm tra số lượng sách còn lại
+            if (book.RemainingQuantity <= 0)
+            {
+                return BadRequest(new { message = "Sách đã hết hàng." });
+            }
+
+            // Giảm số lượng còn lại
+            book.RemainingQuantity -= 1;
+
+            _context.Entry(book).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BookExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(new { message = "     ", RemainingQuantity = book.RemainingQuantity });
+        }
+        [HttpPut("RemoveFromCart/{id}")]
+        public async Task<IActionResult> RemoveFromCart(int id)
+        {
+            var book = await _context.Book.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound(new { message = "Không tìm thấy sách." });
+            }
+
+            
+
+            // + 1 số lượng còn lại
+            book.RemainingQuantity += 1;
+
+            _context.Entry(book).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BookExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(new { message = "Sách đã được xóa khỏi giỏ hàng.", RemainingQuantity = book.RemainingQuantity });
+        }
 
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
