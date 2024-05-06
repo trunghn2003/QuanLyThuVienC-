@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien.Data;
 using QuanLyThuVien.Models;
+using QuanLyThuVien.Services;
 
 namespace QuanLyThuVien.Controllers
 {
@@ -14,27 +15,28 @@ namespace QuanLyThuVien.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly QuanLyThuVienContext _context;
+        private readonly IAuthorService _authorService;
 
-        public AuthorsController(QuanLyThuVienContext context)
+        public AuthorsController(IAuthorService authorService)
         {
-            _context = context;
+            _authorService = authorService; 
         }
 
         // GET: api/Authors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
         {
-            return await _context.Author.ToListAsync();
+            return await _authorService.GetAuthor();
         }
 
         // GET: api/Authors/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Author>> GetAuthor(int id)
         {
-            var author = await _context.Author.FindAsync(id);
 
-            if (author == null)
+            var author = await _authorService.GetAuthor(id);
+
+            if (!_authorService.AuthorExists(id))
             {
                 return NotFound();
             }
@@ -47,30 +49,14 @@ namespace QuanLyThuVien.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAuthor(int id, Author author)
         {
-            if (id != author.AuthorID)
+            if (!await _authorService.PutAuthor(id, author))
             {
-                return BadRequest();
-            }
-
-            _context.Entry(author).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AuthorExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
+
+
         }
 
         // POST: api/Authors
@@ -78,31 +64,25 @@ namespace QuanLyThuVien.Controllers
         [HttpPost]
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
-            _context.Author.Add(author);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuthor", new { id = author.AuthorID }, author);
+            var newAuthor = await _authorService.PostAuthor(author);
+
+
+            return CreatedAtAction(nameof(GetAuthor), newAuthor);
+
         }
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            var author = await _context.Author.FindAsync(id);
-            if (author == null)
+            if (!await _authorService.DeleteAuthor(id))
             {
                 return NotFound();
             }
-
-            _context.Author.Remove(author);
-            await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
-        private bool AuthorExists(int id)
-        {
-            return _context.Author.Any(e => e.AuthorID == id);
-        }
+       
     }
 }

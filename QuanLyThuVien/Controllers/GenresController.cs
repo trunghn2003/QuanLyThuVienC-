@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyThuVien.Data;
 using QuanLyThuVien.Models;
+using QuanLyThuVien.Services;
 
 namespace QuanLyThuVien.Controllers
 {
@@ -14,27 +10,27 @@ namespace QuanLyThuVien.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly QuanLyThuVienContext _context;
+        private readonly IGenreService _genreService;
 
-        public GenresController(QuanLyThuVienContext context)
+        public GenresController(IGenreService genreService)
         {
-            _context = context;
+            _genreService = genreService;
         }
 
         // GET: api/Genres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenre()
+        public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
         {
-            return await _context.Genre.ToListAsync();
+            return await _genreService.GetGenres();
         }
 
         // GET: api/Genres/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Genre>> GetGenre(int id)
         {
-            var genre = await _context.Genre.FindAsync(id);
+            var genre = await _genreService.GetGenre(id);
 
-            if (genre == null)
+            if (!_genreService.GenreExists(id))
             {
                 return NotFound();
             }
@@ -43,66 +39,34 @@ namespace QuanLyThuVien.Controllers
         }
 
         // PUT: api/Genres/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
-            if (id != genre.GenreID)
+            if (!await _genreService.PutGenre(id, genre))
             {
-                return BadRequest();
-            }
-
-            _context.Entry(genre).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GenreExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
         }
 
         // POST: api/Genres
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
-            _context.Genre.Add(genre);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetGenre", new { id = genre.GenreID }, genre);
+            var newGenre = await _genreService.PostGenre(genre);
+            return CreatedAtAction(nameof(GetGenre), new { id = newGenre.Value.GenreID }, newGenre);
         }
 
         // DELETE: api/Genres/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
-            var genre = await _context.Genre.FindAsync(id);
-            if (genre == null)
+            if (!await _genreService.DeleteGenre(id))
             {
                 return NotFound();
             }
-
-            _context.Genre.Remove(genre);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool GenreExists(int id)
-        {
-            return _context.Genre.Any(e => e.GenreID == id);
         }
     }
 }
