@@ -1,22 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyThuVien.Data;
 using QuanLyThuVien.Models;
-
-
-public class BorrowingDto
-{
-    public int BorrowingID { get; set; }
-    public int UserID { get; set; }
-    public string ? Status { get; set; }
-    public DateTime BorrowDate { get; set; }
-    public DateTime? ReturnDate { get; set; }
-}
+using QuanLyThuVien.Services;
+using QuanLyThuVien.Services.Dto;
 
 namespace QuanLyThuVien.Controllers
 {
@@ -24,141 +12,18 @@ namespace QuanLyThuVien.Controllers
     [ApiController]
     public class BorrowingsController : ControllerBase
     {
-        private readonly QuanLyThuVienContext _context;
+        private readonly IBorrowingService _borrowingService;
 
-        public BorrowingsController(QuanLyThuVienContext context)
+        public BorrowingsController(IBorrowingService borrowingService)
         {
-            _context = context;
+            _borrowingService = borrowingService;
         }
-
         // GET: api/Borrowings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BorrowingDto>>> GetBorrowing()
+        public async Task<ActionResult<IEnumerable<BorrowingDto>>> GetAllBorrowings()
         {
-            var borrowings = await _context.Borrowing.ToListAsync();
-            var borrowingDtos = borrowings.Select(b => new BorrowingDto
-            {
-                BorrowingID = b.BorrowingID,
-                Status = b.Status,
-                UserID = b.UserID,
-                BorrowDate = b.BorrowDate,
-                ReturnDate = b.ReturnDate
-            });
-
-            return Ok(borrowingDtos);
-        }
-
-        // GET: api/Borrowings/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BorrowingDto>> GetBorrowing(int id)
-        {
-            var borrowing = await _context.Borrowing.FindAsync(id);
-
-            if (borrowing == null)
-            {
-                return NotFound();
-            }
-
-            var borrowingDto = new BorrowingDto
-            {
-                BorrowingID = borrowing.BorrowingID,
-                Status = borrowing.Status,
-                UserID = borrowing.UserID,
-                BorrowDate = borrowing.BorrowDate,
-                ReturnDate = borrowing.ReturnDate
-            };
-
-            return borrowingDto;
-        }
-
-        // PUT: api/Borrowings/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBorrowing(int id, BorrowingDto borrowingDto)
-        {
-            if (id != borrowingDto.BorrowingID)
-            {
-                return BadRequest();
-            }
-
-            var borrowing = new Borrowing
-            {
-                BorrowingID = borrowingDto.BorrowingID,
-                Status = borrowingDto.Status,
-                UserID = borrowingDto.UserID,
-                BorrowDate = borrowingDto.BorrowDate,
-                ReturnDate = (DateTime)borrowingDto.ReturnDate
-            };
-
-            _context.Entry(borrowing).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BorrowingExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Borrowings
-        [HttpPost]
-        public async Task<ActionResult<BorrowingDto>> PostBorrowing(BorrowingDto borrowingDto)
-        {
-            var borrowing = new Borrowing
-            {
-                UserID = borrowingDto.UserID,
-                Status = borrowingDto.Status,
-                BorrowDate = borrowingDto.BorrowDate,
-                ReturnDate = (DateTime)borrowingDto.ReturnDate
-            };
-
-            _context.Borrowing.Add(borrowing);
-            await _context.SaveChangesAsync();
-
-            var resultDto = new BorrowingDto
-            {
-                BorrowingID = borrowing.BorrowingID,
-                UserID = borrowing.UserID,
-                BorrowDate = borrowing.BorrowDate,
-                ReturnDate = borrowing.ReturnDate
-            };
-
-            return CreatedAtAction("GetBorrowing", new { id = resultDto.BorrowingID }, resultDto);
-        }
-
-        // DELETE: api/Borrowings/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBorrowing(int id)
-        {
-            var borrowing = await _context.Borrowing.FindAsync(id);
-            if (borrowing == null)
-            {
-                return NotFound();
-            }
-
-            _context.Borrowing.Remove(borrowing);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-        [HttpGet("User/{userId}")]
-        public async Task<ActionResult<IEnumerable<BorrowingDto>>> GetBorrowingsByUserId(int userId)
-        {
-            var borrowings = await _context.Borrowing
-                                          .Where(b => b.UserID == userId)
-                                          .ToListAsync();
-
-            if (borrowings == null || borrowings.Count == 0)
+            var borrowings = await _borrowingService.GetAllAsync();
+            if (borrowings == null || !borrowings.Any())
             {
                 return NotFound();
             }
@@ -174,42 +39,124 @@ namespace QuanLyThuVien.Controllers
 
             return Ok(borrowingDtos);
         }
-        [HttpPut("{id}/Return")]
-        public async Task<IActionResult> ReturnBorrowing(int id)
+
+
+        // GET: api/Borrowings/User/5
+        [HttpGet("User/{userId}")]
+        public async Task<ActionResult<IEnumerable<BorrowingDto>>> GetBorrowingsByUserId(int userId)
         {
-            var borrowing = await _context.Borrowing.FindAsync(id);
+            var borrowings = await _borrowingService.GetByUserIdAsync(userId);
+            if (borrowings == null || !borrowings.Any())
+            {
+                return NotFound();
+            }
+
+            var borrowingDtos = borrowings.Select(b => new BorrowingDto
+            {
+                BorrowingID = b.BorrowingID,
+                UserID = b.UserID,
+                Status = b.Status,
+                BorrowDate = b.BorrowDate,
+                ReturnDate = b.ReturnDate
+            }).ToList();
+
+            return Ok(borrowingDtos);
+        }
+
+        // GET: api/Borrowings/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BorrowingDto>> GetBorrowingById(int id)
+        {
+            var borrowing = await _borrowingService.GetByIdAsync(id);
+
             if (borrowing == null)
             {
                 return NotFound();
             }
 
-            // Cập nhật trạng thái và ngày trả sách
+            var borrowingDto = new BorrowingDto
+            {
+                BorrowingID = borrowing.BorrowingID,
+                UserID = borrowing.UserID,
+                Status = borrowing.Status,
+                BorrowDate = borrowing.BorrowDate,
+                ReturnDate = borrowing.ReturnDate
+            };
+
+            return Ok(borrowingDto);
+        }
+
+        // POST: api/Borrowings
+        [HttpPost]
+        public async Task<ActionResult<BorrowingDto>> CreateBorrowing(BorrowingDto borrowingDto)
+        {
+            var borrowing = new Borrowing
+            {
+                UserID = borrowingDto.UserID,
+                Status = borrowingDto.Status,
+                BorrowDate = borrowingDto.BorrowDate,
+                ReturnDate = (DateTime)borrowingDto.ReturnDate
+            };
+
+            await _borrowingService.AddAsync(borrowing);
+
+            borrowingDto.BorrowingID = borrowing.BorrowingID;
+
+            return CreatedAtAction(nameof(GetBorrowingById), new { id = borrowingDto.BorrowingID }, borrowingDto);
+        }
+
+        // PUT: api/Borrowings/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBorrowing(int id, BorrowingDto borrowingDto)
+        {
+            if (id != borrowingDto.BorrowingID)
+            {
+                return BadRequest();
+            }
+
+            var borrowing = new Borrowing
+            {
+                BorrowingID = borrowingDto.BorrowingID,
+                UserID = borrowingDto.UserID,
+                Status = borrowingDto.Status,
+                BorrowDate = borrowingDto.BorrowDate,
+                ReturnDate = (DateTime)borrowingDto.ReturnDate
+            };
+
+            await _borrowingService.UpdateAsync(borrowing);
+
+            return NoContent();
+        }
+
+        // DELETE: api/Borrowings/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBorrowing(int id)
+        {
+            await _borrowingService.DeleteAsync(id);
+            return NoContent();
+        }
+
+        // PUT: api/Borrowings/{id}/Return
+        [HttpPut("{id}/Return")]
+        public async Task<IActionResult> MarkBorrowingAsReturned(int id)
+        {
+            var borrowing = await _borrowingService.GetByIdAsync(id);
+            if (borrowing == null)
+            {
+                return NotFound();
+            }
+
             borrowing.Status = "Đã trả";
-            borrowing.ReturnDate = DateTime.Now;
+            borrowing.ReturnDate = System.DateTime.Now;
 
-            _context.Entry(borrowing).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return NoContent(); // Bạn cũng có thể trả về thông tin phiếu mượn đã cập nhật nếu cần
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BorrowingExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _borrowingService.UpdateAsync(borrowing);
+            return NoContent();
         }
         [HttpPut("{id}/ReturnedAwaitingApproval")]
         public async Task<IActionResult> MarkReturnedAwaitingApproval(int id)
         {
-            var borrowing = await _context.Borrowing.FindAsync(id);
+            var borrowing = await _borrowingService.GetByIdAsync(id);
+
             if (borrowing == null)
             {
                 return NotFound();
@@ -219,96 +166,26 @@ namespace QuanLyThuVien.Controllers
             borrowing.Status = "Đang chờ phê duyệt trả"; // Or an appropriate status in your language
             borrowing.ReturnDate = DateTime.Now; // Record the date when the book was returned
 
-            _context.Entry(borrowing).State = EntityState.Modified;
+            await _borrowingService.UpdateAsync(borrowing);
+            return NoContent();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-                return NoContent(); // You could also return the updated borrowing record if needed
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BorrowingExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            
         }
 
+        // PUT: api/Borrowings/{id}/ConfirmBorrowing
         [HttpPut("{id}/ConfirmBorrowing")]
         public async Task<IActionResult> ConfirmBorrowing(int id)
         {
-            var borrowing = await _context.Borrowing.FindAsync(id);
+            var borrowing = await _borrowingService.GetByIdAsync(id);
             if (borrowing == null)
             {
                 return NotFound();
             }
 
-            // Cập nhật trạng thái mượn sách
-            borrowing.Status = "Đã mượn"; // hoặc một trạng thái thích hợp khác
-            _context.Entry(borrowing).State = EntityState.Modified;
+            borrowing.Status = "Đã mượn";
 
-            try
-            {
-                await _context.SaveChangesAsync();
-                return NoContent(); // hoặc bạn có thể trả về phiếu mượn đã cập nhật
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BorrowingExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _borrowingService.UpdateAsync(borrowing);
+            return NoContent();
         }
-
-        // PUT: api/Borrowings/{id}/ConfirmReturning
-        [HttpPut("{id}/ConfirmReturning")]
-        public async Task<IActionResult> ConfirmReturning(int id)
-        {
-            var borrowing = await _context.Borrowing.FindAsync(id);
-            if (borrowing == null)
-            {
-                return NotFound();
-            }
-
-            // Cập nhật trạng thái trả sách
-            borrowing.Status = "Returning Confirmed"; // hoặc một trạng thái thích hợp khác
-            borrowing.ReturnDate = DateTime.Now;
-
-            _context.Entry(borrowing).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return NoContent(); // hoặc bạn có thể trả về phiếu mượn đã cập nhật
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BorrowingExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
-        private bool BorrowingExists(int id)
-        {
-            return _context.Borrowing.Any(e => e.BorrowingID == id);
-        }
-
     }
-    
 }
