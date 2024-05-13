@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
 using QuanLyThuVien.Services.Dto;
@@ -19,6 +20,7 @@ public class BorrowedBooksController : ControllerBase
 
     // GET: api/BorrowedBooks
     [HttpGet]
+
     public async Task<ActionResult<IEnumerable<BorrowedBookDto>>> GetBorrowedBook()
     {
         var borrowedBooks = await _borrowedBookService.GetAllAsync();
@@ -54,6 +56,9 @@ public class BorrowedBooksController : ControllerBase
 
     // POST: api/BorrowedBooks
     [HttpPost]
+    [Authorize(Roles = "admin,user")]
+
+
     public async Task<ActionResult<BorrowedBookDto>> PostBorrowedBook(BorrowedBookDto borrowedBookDto)
     {
         var borrowedBook = new BorrowedBook
@@ -70,6 +75,8 @@ public class BorrowedBooksController : ControllerBase
 
     // PUT: api/BorrowedBooks/5
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin,user")]
+
     public async Task<IActionResult> PutBorrowedBook(int id, BorrowedBookDto borrowedBookDto)
     {
         if (id != borrowedBookDto.BorrowedBookID)
@@ -98,6 +105,8 @@ public class BorrowedBooksController : ControllerBase
 
     // DELETE: api/BorrowedBooks/5
     [HttpDelete("{id}")]
+    [Authorize("admin")]
+
     public async Task<IActionResult> DeleteBorrowedBook(int id)
     {
         try
@@ -114,6 +123,8 @@ public class BorrowedBooksController : ControllerBase
 
     // GET: api/BorrowedBooks/Borrowing/1
     [HttpGet("Borrowing/{borrowingId}")]
+    //[Authorize(Roles = "admin,user")]
+
     public async Task<ActionResult<IEnumerable<BorrowedBookDto>>> GetBorrowedBooksByBorrowingId(int borrowingId)
     {
         var borrowedBooks = await _borrowedBookService.GetByBorrowingIdAsync(borrowingId);

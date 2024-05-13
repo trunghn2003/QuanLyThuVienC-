@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
@@ -40,6 +41,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Genres/5
         [HttpPut("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
             if (!await _genreService.PutGenre(id, genre))
@@ -52,6 +55,8 @@ namespace QuanLyThuVien.Controllers
 
         // POST: api/Genres
         [HttpPost]
+        [Authorize("admin")]
+
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
             var newGenre = await _genreService.PostGenre(genre);
@@ -60,6 +65,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Genres/5
         [HttpDelete("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> DeleteGenre(int id)
         {
             if (!await _genreService.DeleteGenre(id))

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,9 +46,18 @@ namespace QuanLyThuVien.Controllers
 
             return book;
         }
+        //Get api/Books/Author/5
+        // write the GetBooksByAuthor method
+        [HttpGet("Author/{id}")]
+        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByAuthor(int id)
+        {
+            return (await _bookService.GetBooksByAuthor(id));
+        }
 
         // POST: api/Books
         [HttpPost]
+        [Authorize("admin")]
+
         public async Task<ActionResult<Book>> PostBook(BookCreateDTO bookDto)
         {
             var newBook = await _bookService.PostBook(bookDto);
@@ -58,6 +68,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Books/5
         [HttpPut("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> PutBook(int id, BookUpdateDTO bookDto)
         {
             if (!await _bookService.PutBook(id, bookDto))
@@ -68,6 +80,7 @@ namespace QuanLyThuVien.Controllers
             return NoContent();
         }
         [HttpPut("AddToCart/{id}")]
+        [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> AddToCart(int id)
         {
             
@@ -88,6 +101,7 @@ namespace QuanLyThuVien.Controllers
 
         }
         [HttpPut("RemoveFromCart/{id}")]
+        [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> RemoveFromCart(int id)
         {
             if (!_bookService.BookExists(id))
@@ -106,6 +120,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> DeleteBook(int id)
         {
             if (!await _bookService.DeleteBook(id))

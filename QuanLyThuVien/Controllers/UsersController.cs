@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using QuanLyThuVien.Data;
 using QuanLyThuVien.Models;
 
@@ -86,6 +91,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.User.FindAsync(id);
@@ -100,6 +107,43 @@ namespace QuanLyThuVien.Controllers
             return NoContent();
         }
         [HttpPost("Login")]
+        public async Task<ActionResult<User>> Login(UserLogin userLogin, IConfiguration configuration)
+        {
+            var user = await _context.User
+                                     .FirstOrDefaultAsync(u => u.Username == userLogin.Username && u.Password == userLogin.Password);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid username or password");
+            }
+            string token = string.Empty;
+            var issuer = configuration["JwtConfig:Issuer"];
+            var audience = configuration["JwtConfig:Audience"];
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(configuration["JwtConfig:SecretKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("UserID", user.UserID.ToString()),
+                   
+                }),
+                Issuer = issuer,
+                Audience = audience,
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var jwtToken = jwtHandler.CreateToken(tokenDescriptor);
+            token = jwtHandler.WriteToken(jwtToken);
+
+
+
+
+            return Ok(token);
+        }
+        /*[HttpPost("Login")]
         public async Task<ActionResult<User>> Login(UserLogin userLogin)
         {
             var user = await _context.User
@@ -111,7 +155,7 @@ namespace QuanLyThuVien.Controllers
             }
 
             return Ok(user);
-        }
+        }*/
         public class UserLogin
         {
             public string Username { get; set; }

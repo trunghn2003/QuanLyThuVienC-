@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien.Models;
@@ -65,6 +66,7 @@ namespace QuanLyThuVien.Controllers
 
         // GET: api/Borrowings/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin,user")]
         public async Task<ActionResult<BorrowingDto>> GetBorrowingById(int id)
         {
             var borrowing = await _borrowingService.GetByIdAsync(id);
@@ -88,6 +90,9 @@ namespace QuanLyThuVien.Controllers
 
         // POST: api/Borrowings
         [HttpPost]
+        [Authorize(Roles = "admin,user")]
+
+
         public async Task<ActionResult<BorrowingDto>> CreateBorrowing(BorrowingDto borrowingDto)
         {
             var borrowing = new Borrowing
@@ -107,6 +112,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Borrowings/5
         [HttpPut("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> UpdateBorrowing(int id, BorrowingDto borrowingDto)
         {
             if (id != borrowingDto.BorrowingID)
@@ -130,6 +137,7 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Borrowings/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteBorrowing(int id)
         {
             await _borrowingService.DeleteAsync(id);
@@ -138,6 +146,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Borrowings/{id}/Return
         [HttpPut("{id}/Return")]
+        [Authorize(Roles = "admin")]
+
         public async Task<IActionResult> MarkBorrowingAsReturned(int id)
         {
             var borrowing = await _borrowingService.GetByIdAsync(id);
@@ -153,6 +163,7 @@ namespace QuanLyThuVien.Controllers
             return NoContent();
         }
         [HttpPut("{id}/ReturnedAwaitingApproval")]
+        [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> MarkReturnedAwaitingApproval(int id)
         {
             var borrowing = await _borrowingService.GetByIdAsync(id);

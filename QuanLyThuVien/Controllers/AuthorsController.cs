@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ namespace QuanLyThuVien.Controllers
         }
 
         // GET: api/Authors
+        // use authorication
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
         {
@@ -47,6 +50,8 @@ namespace QuanLyThuVien.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> PutAuthor(int id, Author author)
         {
             if (!await _authorService.PutAuthor(id, author))
@@ -62,6 +67,8 @@ namespace QuanLyThuVien.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("admin")]
+
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
 
@@ -74,6 +81,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
+        [Authorize("admin")]
+
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             if (!await _authorService.DeleteAuthor(id))
