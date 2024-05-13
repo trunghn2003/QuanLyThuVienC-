@@ -5,6 +5,7 @@ namespace QuanLyThuVien.Repositories
     public interface IBookRepository
     {
         Task<Book> GetByIdAsync(int id);
+        Task<List<Book>>GetBooksByAuthor(int id);
         Task<List<Book>> GetAllAsync();
         Task AddAsync(Book book);
         Task UpdateAsync(Book book);

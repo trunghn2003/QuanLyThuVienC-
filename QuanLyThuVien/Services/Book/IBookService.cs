@@ -6,6 +6,7 @@ namespace QuanLyThuVien.Services
     {
         Task<ActionResult<IEnumerable<Book>>> GetBooks();
         Task<ActionResult<Book>> GetBook(int id);
+        Task<ActionResult<IEnumerable<Book>>> GetBooksByAuthor(int authorId);
         Task<ActionResult<Book>> PostBook(BookCreateDTO bookDto);
         Task<bool> PutBook(int id, BookUpdateDTO bookDto);
         Task<bool> AddToCart(int id);

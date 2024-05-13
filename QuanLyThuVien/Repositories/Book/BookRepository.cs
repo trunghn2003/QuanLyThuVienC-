@@ -38,7 +38,11 @@ namespace QuanLyThuVien.Repositories
         {
             return await _context.Book.FindAsync(id);
         }
-
+        // implement the GetBooksByAuthor method
+        public async Task<List<Book>> GetBooksByAuthor(int id)
+        {
+            return await _context.Book.Where(b => b.AuthorID == id).ToListAsync();
+        }
         public async Task UpdateAsync(Book book)
         {
             _context.Entry(book).State = EntityState.Modified;

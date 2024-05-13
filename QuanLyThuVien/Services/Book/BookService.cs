@@ -111,5 +111,11 @@ namespace QuanLyThuVien.Services
            await _bookRepository.UpdateAsync(book);
             return true;
         }
+        // write a method to get books by author
+        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByAuthor(int authorId)
+        {
+            var books = await _bookRepository.GetBooksByAuthor(authorId);
+            return books;
+        }
     }
 }
