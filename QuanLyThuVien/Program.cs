@@ -37,21 +37,20 @@ builder.Services.AddAuthorizationBuilder()
     {
         p.RequireRole("admin");
     });
-builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<UnitOfWork>();
+
 builder.Services.AddScoped<IBookService, BookService>();
 
-builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 
 
-builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 
-builder.Services.AddScoped<IBorrowingRepository, BorrowingRepository>();
 builder.Services.AddScoped<IBorrowingService, BorrowingService>();
 
-builder.Services.AddScoped<IBorrowedBookRepository, BorrowedBookRepository>();
 builder.Services.AddScoped<IBorrowedBookService, BorrowedBookService>();
+
+builder.Services.AddScoped<IStatisticsBorrowedBookService, StatisticsBorrowedBookService>();
 
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(opt =>

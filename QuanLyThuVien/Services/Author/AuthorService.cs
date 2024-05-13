@@ -6,42 +6,45 @@ namespace QuanLyThuVien.Services
 {
     public class AuthorService : IAuthorService
     {
-        private readonly IAuthorRepository _authorRepository;
-        public AuthorService(IAuthorRepository authorRepository)
+        private readonly UnitOfWork _unitOfWork;
+        public AuthorService(UnitOfWork unitOfWork)
         {
-            _authorRepository = authorRepository;
+            _unitOfWork = unitOfWork;
         }
         public bool AuthorExists(int id)
         {
-            return _authorRepository.Exists(id);
+            return _unitOfWork.AuthorRepository.Exists(id);
         }
 
         public async Task<bool> DeleteAuthor(int id)
         {
-            var author = await _authorRepository.GetByIdAsync(id);
+            var author = await _unitOfWork.AuthorRepository.GetByIdAsync(id);
             if (author == null)
             {
                 return false;
             }
-            await _authorRepository.DeleteAsync(author);
+            await _unitOfWork.AuthorRepository.DeleteAsync(author);
+             _unitOfWork.Save();
             return true;
         }
 
         public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
         {
-            var authors = await _authorRepository.GetAllAsync();
+            var authors = await _unitOfWork.AuthorRepository.GetAllAsync();
             return authors;
         }
 
         public async Task<ActionResult<Author>> GetAuthor(int id)
         {
-            var author = await _authorRepository.GetByIdAsync(id);
+            var author = await _unitOfWork.AuthorRepository.GetByIdAsync(id);
             return author;
         }
 
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
-            await _authorRepository.AddAsync(author);
+            await _unitOfWork.AuthorRepository.AddAsync(author);
+            _unitOfWork.Save();
+
 
             return author;
         }
@@ -52,9 +55,11 @@ namespace QuanLyThuVien.Services
             {
                 return false;
             }
-            var authorO = await _authorRepository.GetByIdAsync(id);
+            var authorO = await _unitOfWork.AuthorRepository.GetByIdAsync(id);
             authorO.AuthorName = author.AuthorName;
-            await _authorRepository.UpdateAsync(authorO);
+            await _unitOfWork.AuthorRepository.UpdateAsync(authorO);
+            _unitOfWork.Save();
+
             return true;
 
 

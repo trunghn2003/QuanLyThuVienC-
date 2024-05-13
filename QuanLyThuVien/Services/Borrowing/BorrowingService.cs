@@ -8,42 +8,48 @@ namespace QuanLyThuVien.Services
 {
     public class BorrowingService : IBorrowingService
     {
-        private readonly IBorrowingRepository _borrowingRepository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public BorrowingService(IBorrowingRepository borrowingRepository)
+        public BorrowingService(UnitOfWork unitOfWork)
         {
-            _borrowingRepository = borrowingRepository;
-        }
+            _unitOfWork = unitOfWork;
+        }       
+        
         public async Task<IEnumerable<Borrowing>> GetAllAsync()
         {
-            return await _borrowingRepository.GetAllAsync();
+            return await _unitOfWork.BorrowingRepository.GetAllAsync();
         }
         public async Task<IEnumerable<Borrowing>> GetByUserIdAsync(int userId)
         {
-            return await _borrowingRepository.GetByUserIdAsync(userId);
+            return await _unitOfWork.BorrowingRepository.GetByUserIdAsync(userId);
         }
 
         public async Task<Borrowing> GetByIdAsync(int id)
         {
-            return await _borrowingRepository.GetByIdAsync(id);
+            return await _unitOfWork.BorrowingRepository.GetByIdAsync(id);
         }
 
         public async Task AddAsync(Borrowing borrowing)
         {
-            await _borrowingRepository.AddAsync(borrowing);
+            await _unitOfWork.BorrowingRepository.AddAsync(borrowing);
+            _unitOfWork.Save();
         }
 
         public async Task UpdateAsync(Borrowing borrowing)
         {
-            await _borrowingRepository.UpdateAsync(borrowing);
+            await _unitOfWork.BorrowingRepository.UpdateAsync(borrowing);
+            _unitOfWork.Save();
+
         }
 
         public async Task DeleteAsync(int id)
         {
-            var borrowing = await _borrowingRepository.GetByIdAsync(id);
+            var borrowing = await _unitOfWork.BorrowingRepository.GetByIdAsync(id);
             if (borrowing != null)
             {
-                await _borrowingRepository.DeleteAsync(borrowing);
+                await _unitOfWork.BorrowingRepository.DeleteAsync(borrowing);
+                _unitOfWork.Save();
+
             }
         }
     }

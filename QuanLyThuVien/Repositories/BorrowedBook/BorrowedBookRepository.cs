@@ -7,25 +7,13 @@ using System.Threading.Tasks;
 
 namespace QuanLyThuVien.Repositories
 {
-    public class BorrowedBookRepository : IBorrowedBookRepository
+    public class BorrowedBookRepository : GenericRepository<BorrowedBook>
     {
         private readonly QuanLyThuVienContext _context;
 
-        public BorrowedBookRepository(QuanLyThuVienContext context)
+        public BorrowedBookRepository(QuanLyThuVienContext context) : base(context)
         {
             _context = context;
-        }
-
-        public async Task<IEnumerable<BorrowedBook>> GetAllAsync()
-        {
-            return await _context.BorrowedBook.Include(b => b.Book).ToListAsync();
-        }
-
-        public async Task<BorrowedBook?> GetByIdAsync(int id)
-        {
-            return await _context.BorrowedBook
-                .Include(b => b.Book)
-                .FirstOrDefaultAsync(b => b.BorrowedBookID == id);
         }
 
         public async Task<IEnumerable<BorrowedBook>> GetByBorrowingIdAsync(int borrowingId)
@@ -36,13 +24,8 @@ namespace QuanLyThuVien.Repositories
                 .ToListAsync();
         }
 
-        public async Task AddAsync(BorrowedBook borrowedBook)
-        {
-            _context.BorrowedBook.Add(borrowedBook);
-            await _context.SaveChangesAsync();
-        }
-
-        public void Update(BorrowedBook borrowedBook)
+       
+        /*public void Update(BorrowedBook borrowedBook)
         {
             _context.Entry(borrowedBook).State = EntityState.Modified;
         }
@@ -55,6 +38,6 @@ namespace QuanLyThuVien.Repositories
         public async Task<bool> ExistsAsync(int id)
         {
             return await _context.BorrowedBook.AnyAsync(b => b.BorrowedBookID == id);
-        }
+        }*/
     }
 }

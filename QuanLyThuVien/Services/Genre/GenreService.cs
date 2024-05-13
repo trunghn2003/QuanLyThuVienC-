@@ -8,44 +8,46 @@ namespace QuanLyThuVien.Services
 {
     public class GenreService : IGenreService
     {
-        private readonly IGenreRepository _genreRepository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public GenreService(IGenreRepository genreRepository)
+        public GenreService(UnitOfWork unitOfWork)
         {
-            _genreRepository = genreRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public bool GenreExists(int id)
         {
-            return _genreRepository.Exists(id);
+            return _unitOfWork.GenreRepository.Exists(id);
         }
 
         public async Task<bool> DeleteGenre(int id)
         {
-            var genre = await _genreRepository.GetByIdAsync(id);
+            var genre = await _unitOfWork.GenreRepository.GetByIdAsync(id);
             if (genre == null)
             {
                 return false;
             }
-            await _genreRepository.DeleteAsync(genre);
+            await _unitOfWork.GenreRepository.DeleteAsync(genre);
+            _unitOfWork.Save();
             return true;
         }
 
         public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
         {
-            var genres = await _genreRepository.GetAllAsync();
+            var genres = await _unitOfWork.GenreRepository.GetAllAsync();
             return genres;
         }
 
         public async Task<ActionResult<Genre>> GetGenre(int id)
         {
-            var genre = await _genreRepository.GetByIdAsync(id);
+            var genre = await _unitOfWork.GenreRepository.GetByIdAsync(id);
             return genre;
         }
 
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
-            await _genreRepository.AddAsync(genre);
+            await _unitOfWork.GenreRepository.AddAsync(genre);
+            _unitOfWork.Save();
             return genre;
         }
 
@@ -55,9 +57,11 @@ namespace QuanLyThuVien.Services
             {
                 return false;
             }
-            var existingGenre = await _genreRepository.GetByIdAsync(id);
+            var existingGenre = await _unitOfWork.GenreRepository.GetByIdAsync(id);
             existingGenre.GenreName = genre.GenreName;
-            await _genreRepository.UpdateAsync(existingGenre);
+            await _unitOfWork.GenreRepository.UpdateAsync(existingGenre);
+            _unitOfWork.Save();
+
             return true;
         }
     }

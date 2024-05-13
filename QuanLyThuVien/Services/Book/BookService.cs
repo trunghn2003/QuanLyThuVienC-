@@ -7,10 +7,10 @@ namespace QuanLyThuVien.Services
 {
     public class BookService : IBookService
     {
-        private readonly IBookRepository _bookRepository;
-        public BookService(IBookRepository bookRepository)
+        private readonly UnitOfWork _unitOfWork;
+        public BookService(UnitOfWork unitOfWork)
         {
-            _bookRepository = bookRepository;
+            _unitOfWork = unitOfWork;
         }
 
 
@@ -20,13 +20,14 @@ namespace QuanLyThuVien.Services
             {
                 return false;
             }
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
             if (book.RemainingQuantity <= 0)
             {
                 return false;
             }
             book.RemainingQuantity -= 1;
-            await _bookRepository.UpdateAsync(book);
+            await _unitOfWork.BookRepository.UpdateAsync(book);
+            _unitOfWork.Save();
             return true;
             
 
@@ -34,17 +35,19 @@ namespace QuanLyThuVien.Services
 
         public bool BookExists(int id)
         {
-            return _bookRepository.Exists(id);
+            return _unitOfWork.BookRepository.Exists(id);
         }
 
         public async Task<bool> DeleteBook(int id)
         {
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
             if(book == null)
             {
                 return false;
             }
-           await _bookRepository.DeleteAsync(book);
+           await _unitOfWork.BookRepository.DeleteAsync(book);
+           _unitOfWork.Save();
+
             return true;
 
         }
@@ -52,7 +55,7 @@ namespace QuanLyThuVien.Services
         public async Task<ActionResult<Book>> GetBook(int id)
         {
 
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
             return book;
 
 
@@ -60,7 +63,7 @@ namespace QuanLyThuVien.Services
 
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            var books = await _bookRepository.GetAllAsync();
+            var books = await _unitOfWork.BookRepository.GetAllAsync();
             return books; 
         }
 
@@ -76,7 +79,9 @@ namespace QuanLyThuVien.Services
                 RemainingQuantity = bookDto.RemainingQuantity,
                 Image = bookDto.Image
             };
-            await _bookRepository.AddAsync(book);
+            await _unitOfWork.BookRepository.AddAsync(book);
+            _unitOfWork.Save();
+
 
             return book;
         }
@@ -88,7 +93,7 @@ namespace QuanLyThuVien.Services
                 return false;
             }
 
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
             book.Title = bookDto.Title ?? book.Title;
             book.AuthorID = bookDto.AuthorId ?? book.AuthorID;
             book.GenreID = bookDto.GenreId ?? book.GenreID;
@@ -96,7 +101,9 @@ namespace QuanLyThuVien.Services
             book.TotalQuantity = bookDto.TotalQuantity;
             book.RemainingQuantity = bookDto.RemainingQuantity;
             book.Image = bookDto.Image ?? book.Image;
-            await _bookRepository.UpdateAsync(book);
+            await _unitOfWork.BookRepository.UpdateAsync(book);
+            _unitOfWork.Save();
+
             return true;
         }
 
@@ -106,15 +113,17 @@ namespace QuanLyThuVien.Services
             {
                 return false;
             }
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
             book.RemainingQuantity += 1;
-           await _bookRepository.UpdateAsync(book);
+           await _unitOfWork.BookRepository.UpdateAsync(book);
+           _unitOfWork.Save();
+
             return true;
         }
         // write a method to get books by author
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksByAuthor(int authorId)
         {
-            var books = await _bookRepository.GetBooksByAuthor(authorId);
+            var books = await _unitOfWork.BookRepository.GetBooksByAuthor(authorId);
             return books;
         }
     }

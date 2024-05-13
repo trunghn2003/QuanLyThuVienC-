@@ -7,38 +7,41 @@ namespace QuanLyThuVien.Services
 {
     public class BorrowedBookService : IBorrowedBookService
     {
-        private readonly IBorrowedBookRepository _repository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public BorrowedBookService(IBorrowedBookRepository repository)
+        public BorrowedBookService(UnitOfWork unitOfWork)
         {
-            _repository = repository;
-        }
+            _unitOfWork = unitOfWork;
+        }   
+       
 
         public async Task<IEnumerable<BorrowedBook>> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            return await _unitOfWork.BorrowedBookRepository.GetAllAsync();
         }
 
         public async Task<BorrowedBook?> GetByIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id);
+            return await _unitOfWork.BorrowedBookRepository.GetByIdAsync(id);
         }
 
         public async Task<IEnumerable<BorrowedBook>> GetByBorrowingIdAsync(int borrowingId)
         {
-            return await _repository.GetByBorrowingIdAsync(borrowingId);
+            return await _unitOfWork.BorrowedBookRepository.GetByBorrowingIdAsync(borrowingId);
         }
 
         public async Task AddAsync(BorrowedBook borrowedBook)
         {
-            await _repository.AddAsync(borrowedBook);
+            await _unitOfWork.BorrowedBookRepository.AddAsync(borrowedBook);
+            _unitOfWork.Save();
         }
 
         public async Task UpdateAsync(int id, BorrowedBook borrowedBook)
         {
-            if (await _repository.ExistsAsync(id))
+            if ( _unitOfWork.BorrowedBookRepository.Exists(id))
             {
-                _repository.Update(borrowedBook);
+               await _unitOfWork.BorrowedBookRepository.UpdateAsync(borrowedBook);
+                _unitOfWork.Save();
             }
             else
             {
@@ -48,10 +51,12 @@ namespace QuanLyThuVien.Services
 
         public async Task DeleteAsync(int id)
         {
-            var borrowedBook = await _repository.GetByIdAsync(id);
+            var borrowedBook = await _unitOfWork.BorrowedBookRepository.GetByIdAsync(id);
             if (borrowedBook != null)
             {
-                _repository.Delete(borrowedBook);
+                await _unitOfWork.BorrowedBookRepository.DeleteAsync(borrowedBook);
+                _unitOfWork.Save();
+                
             }
             else
             {
