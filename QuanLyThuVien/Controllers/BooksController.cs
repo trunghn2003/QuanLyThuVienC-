@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien.Data;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
 
@@ -18,24 +20,29 @@ namespace QuanLyThuVien.Controllers
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
+        private readonly IMapper _mapper;
 
-
-        public BooksController(IBookService bookService)
+        public BooksController(IBookService bookService,
+            IMapper mapper)
         {
+            _mapper = mapper;
             _bookService = bookService;
         }
 
 
         // GET: api/Books
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
         {
-            return (await _bookService.GetBooks());
+            var books = await _bookService.GetBooks();
+            var bookDtos = books.Select(book => _mapper.Map<BookDto>(book)).ToList();
+
+            return bookDtos;
         }
 
         // GET: api/Books/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBook(int id)
+        public async Task<ActionResult<BookDto>> GetBook(int id)
         {
             var book = await _bookService.GetBook(id);
 
@@ -44,7 +51,9 @@ namespace QuanLyThuVien.Controllers
                 return NotFound();
             }
 
-            return book;
+            var bookDto = _mapper.Map<BookDto>(book);
+
+            return bookDto;
         }
         //Get api/Books/Author/5
         // write the GetBooksByAuthor method

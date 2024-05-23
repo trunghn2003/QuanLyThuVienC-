@@ -3,6 +3,8 @@ using QuanLyThuVien.Repositories;
 using QuanLyThuVien.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using QuanLyThuVien.Dtos;
+
 namespace QuanLyThuVien.Services
 {
     public class BookService : IBookService
@@ -52,7 +54,7 @@ namespace QuanLyThuVien.Services
 
         }
 
-        public async Task<ActionResult<Book>> GetBook(int id)
+        public async Task<Book> GetBook(int id)
         {
 
             var book = await _unitOfWork.BookRepository.GetByIdAsync(id);
@@ -61,7 +63,7 @@ namespace QuanLyThuVien.Services
 
         }
 
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public async Task<IEnumerable<Book>> GetBooks()
         {
             var books = await _unitOfWork.BookRepository.GetAllAsync();
             return books; 
