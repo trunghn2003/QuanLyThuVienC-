@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
 
@@ -12,22 +14,28 @@ namespace QuanLyThuVien.Controllers
     public class GenresController : ControllerBase
     {
         private readonly IGenreService _genreService;
+        private readonly IMapper _mapper;
 
-        public GenresController(IGenreService genreService)
+        public GenresController(IGenreService genreService,
+            IMapper mapper)
+
         {
+            _mapper = mapper;
             _genreService = genreService;
         }
 
         // GET: api/Genres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
+        public async Task<ActionResult<IEnumerable<GenreDto>>> GetGenres()
         {
-            return await _genreService.GetGenres();
+            var genres = await _genreService.GetGenres();
+            var genreDtos = genres.Select(genres => _mapper.Map<GenreDto>(genres)).ToList();
+            return genreDtos; 
         }
 
         // GET: api/Genres/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Genre>> GetGenre(int id)
+        public async Task<ActionResult<GenreDto>> GetGenre(int id)
         {
             var genre = await _genreService.GetGenre(id);
 
@@ -35,8 +43,9 @@ namespace QuanLyThuVien.Controllers
             {
                 return NotFound();
             }
+            var genreDto = _mapper.Map<GenreDto>(genre);
 
-            return genre;
+            return genreDto;
         }
 
         // PUT: api/Genres/5

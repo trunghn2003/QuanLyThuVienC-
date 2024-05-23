@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Repositories;
 using System.Collections.Generic;
@@ -9,9 +11,13 @@ namespace QuanLyThuVien.Services
     public class GenreService : IGenreService
     {
         private readonly UnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public GenreService(UnitOfWork unitOfWork)
+       
+
+        public GenreService(UnitOfWork unitOfWork, IMapper mapper)
         {
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
 
@@ -32,13 +38,14 @@ namespace QuanLyThuVien.Services
             return true;
         }
 
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
+        public async Task<IEnumerable<Genre>> GetGenres()
         {
             var genres = await _unitOfWork.GenreRepository.GetAllAsync();
+            
             return genres;
         }
 
-        public async Task<ActionResult<Genre>> GetGenre(int id)
+        public async Task<Genre> GetGenre(int id)
         {
             var genre = await _unitOfWork.GenreRepository.GetByIdAsync(id);
             return genre;
