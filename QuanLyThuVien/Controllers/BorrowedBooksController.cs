@@ -1,20 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
-using QuanLyThuVien.Services.Dto;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 [Route("api/[controller]")]
 [ApiController]
 public class BorrowedBooksController : ControllerBase
 {
     private readonly IBorrowedBookService _borrowedBookService;
+    private readonly IMapper _mapper;
 
-    public BorrowedBooksController(IBorrowedBookService borrowedBookService)
+    public BorrowedBooksController(IBorrowedBookService borrowedBookService,
+        IMapper mapper
+        )
     {
+        _mapper = mapper;
         _borrowedBookService = borrowedBookService;
     }
 
@@ -24,13 +29,7 @@ public class BorrowedBooksController : ControllerBase
     public async Task<ActionResult<IEnumerable<BorrowedBookDto>>> GetBorrowedBook()
     {
         var borrowedBooks = await _borrowedBookService.GetAllAsync();
-        var borrowedBookDtos = borrowedBooks.Select(bb => new BorrowedBookDto
-        {
-            BorrowedBookID = bb.BorrowedBookID,
-            BorrowingID = bb.BorrowingID,
-            BookID = bb.BookID
-        }).ToList();
-
+        var borrowedBookDtos = borrowedBooks.Select(bb => _mapper.Map<BorrowedBookDto>(bb)).ToList();
         return Ok(borrowedBookDtos);
     }
 
@@ -44,13 +43,7 @@ public class BorrowedBooksController : ControllerBase
             return NotFound();
         }
 
-        var borrowedBookDto = new BorrowedBookDto
-        {
-            BorrowedBookID = borrowedBook.BorrowedBookID,
-            BorrowingID = borrowedBook.BorrowingID,
-            BookID = borrowedBook.BookID
-        };
-
+        var borrowedBookDto = _mapper.Map<BorrowedBookDto>(borrowedBook);
         return Ok(borrowedBookDto);
     }
 
@@ -61,11 +54,7 @@ public class BorrowedBooksController : ControllerBase
 
     public async Task<ActionResult<BorrowedBookDto>> PostBorrowedBook(BorrowedBookDto borrowedBookDto)
     {
-        var borrowedBook = new BorrowedBook
-        {
-            BorrowingID = borrowedBookDto.BorrowingID,
-            BookID = borrowedBookDto.BookID
-        };
+        var borrowedBook = _mapper.Map<BorrowedBook>(borrowedBookDto);
 
         await _borrowedBookService.AddAsync(borrowedBook);
         borrowedBookDto.BorrowedBookID = borrowedBook.BorrowedBookID;
@@ -83,13 +72,7 @@ public class BorrowedBooksController : ControllerBase
         {
             return BadRequest();
         }
-
-        var borrowedBook = new BorrowedBook
-        {
-            BorrowedBookID = borrowedBookDto.BorrowedBookID,
-            BorrowingID = borrowedBookDto.BorrowingID,
-            BookID = borrowedBookDto.BookID
-        };
+        var borrowedBook = _mapper.Map<BorrowedBook>(borrowedBookDto);
 
         try
         {
@@ -128,13 +111,7 @@ public class BorrowedBooksController : ControllerBase
     public async Task<ActionResult<IEnumerable<BorrowedBookDto>>> GetBorrowedBooksByBorrowingId(int borrowingId)
     {
         var borrowedBooks = await _borrowedBookService.GetByBorrowingIdAsync(borrowingId);
-        var borrowedBookDtos = borrowedBooks.Select(bb => new BorrowedBookDto
-        {
-            BorrowedBookID = bb.BorrowedBookID,
-            BorrowingID = bb.BorrowingID,
-            BookID = bb.BookID
-        }).ToList();
-
+        var borrowedBookDtos = borrowedBooks.Select(bb => _mapper.Map<BorrowedBookDto>(bb)).ToList();
         if (!borrowedBookDtos.Any())
         {
             return NotFound(new { message = $"No borrowed books found for borrowing ID {borrowingId}." });
@@ -143,5 +120,5 @@ public class BorrowedBooksController : ControllerBase
         return Ok(borrowedBookDtos);
     }
 
-    
+
 }

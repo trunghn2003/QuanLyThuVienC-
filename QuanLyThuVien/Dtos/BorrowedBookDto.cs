@@ -1,4 +1,4 @@
-﻿namespace QuanLyThuVien.Services.Dto;
+﻿namespace QuanLyThuVien.Dtos;
 
 public class BorrowedBookDto
 {
