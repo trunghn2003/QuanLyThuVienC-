@@ -1,11 +1,13 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
-using QuanLyThuVien.Services.Dto;
+
 
 namespace QuanLyThuVien.Controllers
 {
@@ -14,9 +16,13 @@ namespace QuanLyThuVien.Controllers
     public class BorrowingsController : ControllerBase
     {
         private readonly IBorrowingService _borrowingService;
+        private readonly IMapper _mapper;
 
-        public BorrowingsController(IBorrowingService borrowingService)
+        public BorrowingsController(IBorrowingService borrowingService
+        , IMapper mapper
+        )
         {
+            _mapper = mapper;
             _borrowingService = borrowingService;
         }
         // GET: api/Borrowings
@@ -27,16 +33,8 @@ namespace QuanLyThuVien.Controllers
             if (borrowings == null || !borrowings.Any())
             {
                 return NotFound();
-            }
-
-            var borrowingDtos = borrowings.Select(b => new BorrowingDto
-            {
-                BorrowingID = b.BorrowingID,
-                UserID = b.UserID,
-                Status = b.Status,
-                BorrowDate = b.BorrowDate,
-                ReturnDate = b.ReturnDate
-            }).ToList();
+            } 
+            var borrowingDtos = borrowings.Select(b => _mapper.Map<BorrowingDto>(b)).ToList();
 
             return Ok(borrowingDtos);
         }
@@ -52,14 +50,8 @@ namespace QuanLyThuVien.Controllers
                 return NotFound();
             }
 
-            var borrowingDtos = borrowings.Select(b => new BorrowingDto
-            {
-                BorrowingID = b.BorrowingID,
-                UserID = b.UserID,
-                Status = b.Status,
-                BorrowDate = b.BorrowDate,
-                ReturnDate = b.ReturnDate
-            }).ToList();
+            var borrowingDtos = borrowings.Select(b => _mapper.Map<BorrowingDto>(b)).ToList();
+
 
             return Ok(borrowingDtos);
         }
@@ -76,14 +68,8 @@ namespace QuanLyThuVien.Controllers
                 return NotFound();
             }
 
-            var borrowingDto = new BorrowingDto
-            {
-                BorrowingID = borrowing.BorrowingID,
-                UserID = borrowing.UserID,
-                Status = borrowing.Status,
-                BorrowDate = borrowing.BorrowDate,
-                ReturnDate = borrowing.ReturnDate
-            };
+            var borrowingDto = _mapper.Map<BorrowingDto>(borrowing);
+         
 
             return Ok(borrowingDto);
         }
@@ -95,14 +81,14 @@ namespace QuanLyThuVien.Controllers
 
         public async Task<ActionResult<BorrowingDto>> CreateBorrowing(BorrowingDto borrowingDto)
         {
-            var borrowing = new Borrowing
+            /*var borrowing = new Borrowing
             {
                 UserID = borrowingDto.UserID,
                 Status = borrowingDto.Status,
                 BorrowDate = borrowingDto.BorrowDate,
                 ReturnDate = (DateTime)borrowingDto.ReturnDate
-            };
-
+            };*/
+            var borrowing = _mapper.Map<Borrowing>(borrowingDto);
             await _borrowingService.AddAsync(borrowing);
 
             borrowingDto.BorrowingID = borrowing.BorrowingID;
@@ -121,6 +107,7 @@ namespace QuanLyThuVien.Controllers
                 return BadRequest();
             }
 
+            /*
             var borrowing = new Borrowing
             {
                 BorrowingID = borrowingDto.BorrowingID,
@@ -129,6 +116,8 @@ namespace QuanLyThuVien.Controllers
                 BorrowDate = borrowingDto.BorrowDate,
                 ReturnDate = (DateTime)borrowingDto.ReturnDate
             };
+            */
+            var borrowing = _mapper.Map<Borrowing>(borrowingDto);
 
             await _borrowingService.UpdateAsync(borrowing);
 
