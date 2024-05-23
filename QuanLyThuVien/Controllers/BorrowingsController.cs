@@ -98,7 +98,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Borrowings/5
         [HttpPut("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
+
 
         public async Task<IActionResult> UpdateBorrowing(int id, BorrowingDto borrowingDto)
         {

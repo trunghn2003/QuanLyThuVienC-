@@ -65,7 +65,8 @@ namespace QuanLyThuVien.Controllers
 
         // POST: api/Books
         [HttpPost]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
+
 
         public async Task<ActionResult<Book>> PostBook(BookCreateDTO bookDto)
         {
@@ -77,7 +78,8 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Books/5
         [HttpPut("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
+
 
         public async Task<IActionResult> PutBook(int id, BookUpdateDTO bookDto)
         {
@@ -129,7 +131,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
+
 
         public async Task<IActionResult> DeleteBook(int id)
         {

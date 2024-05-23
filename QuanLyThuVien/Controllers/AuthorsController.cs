@@ -58,7 +58,7 @@ namespace QuanLyThuVien.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<IActionResult> PutAuthor(int id, Author author)
         {
@@ -75,7 +75,7 @@ namespace QuanLyThuVien.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
@@ -89,7 +89,7 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<IActionResult> DeleteAuthor(int id)
         {

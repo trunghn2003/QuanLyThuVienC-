@@ -50,7 +50,7 @@ namespace QuanLyThuVien.Controllers
 
         // PUT: api/Genres/5
         [HttpPut("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
@@ -64,7 +64,7 @@ namespace QuanLyThuVien.Controllers
 
         // POST: api/Genres
         [HttpPost]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
@@ -74,7 +74,7 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Genres/5
         [HttpDelete("{id}")]
-        [Authorize("admin")]
+    [Authorize(Roles = "admin")]
 
         public async Task<IActionResult> DeleteGenre(int id)
         {

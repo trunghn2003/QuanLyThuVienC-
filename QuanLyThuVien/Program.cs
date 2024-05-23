@@ -35,11 +35,7 @@ builder.Services.AddAuthentication()
         };
 
     });
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("admin", p =>
-    {
-        p.RequireRole("admin");
-    });
+
 builder.Services.AddScoped<UnitOfWork>();
 
 builder.Services.AddScoped<IBookService, BookService>();
