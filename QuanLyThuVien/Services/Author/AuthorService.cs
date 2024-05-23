@@ -28,13 +28,13 @@ namespace QuanLyThuVien.Services
             return true;
         }
 
-        public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
+        public async Task<IEnumerable<Author>> GetAuthor()
         {
             var authors = await _unitOfWork.AuthorRepository.GetAllAsync();
             return authors;
         }
 
-        public async Task<ActionResult<Author>> GetAuthor(int id)
+        public async Task<Author> GetAuthor(int id)
         {
             var author = await _unitOfWork.AuthorRepository.GetByIdAsync(id);
             return author;

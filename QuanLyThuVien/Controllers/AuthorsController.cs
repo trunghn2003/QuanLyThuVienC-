@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien.Data;
+using QuanLyThuVien.Dtos;
 using QuanLyThuVien.Models;
 using QuanLyThuVien.Services;
 
@@ -17,34 +19,40 @@ namespace QuanLyThuVien.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly IAuthorService _authorService;
+        private readonly IMapper _mapper;
 
-        public AuthorsController(IAuthorService authorService)
+        public AuthorsController(IAuthorService authorService, IMapper mapper)
         {
-            _authorService = authorService; 
+            _authorService = authorService;
+            _mapper = mapper;
         }
+
+       
 
         // GET: api/Authors
         // use authorication
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthor()
         {
-            return await _authorService.GetAuthor();
+            var authors = await _authorService.GetAuthor();
+            var authorDtos = authors.Select(author => _mapper.Map<AuthorDto>(author)).ToList();
+            return Ok(authorDtos);
         }
 
         // GET: api/Authors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Author>> GetAuthor(int id)
+        public async Task<ActionResult<AuthorDto>> GetAuthor(int id)
         {
-
-            var author = await _authorService.GetAuthor(id);
-
             if (!_authorService.AuthorExists(id))
             {
                 return NotFound();
             }
+          
+            var author = await _authorService.GetAuthor(id);
+            var authorDto = _mapper.Map<AuthorDto>(author); 
 
-            return author;
+            return Ok(authorDto);
         }
 
         // PUT: api/Authors/5

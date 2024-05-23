@@ -5,8 +5,8 @@ namespace QuanLyThuVien.Services
 {
     public interface IAuthorService
     {
-        Task<ActionResult<IEnumerable<Author>>> GetAuthor();
-        Task<ActionResult<Author>> GetAuthor(int id);
+        Task<IEnumerable<Author>> GetAuthor();
+        Task<Author> GetAuthor(int id);
         Task<ActionResult<Author>> PostAuthor(Author author);
         Task<bool> PutAuthor(int id, Author author);
         Task<bool> DeleteAuthor(int id);

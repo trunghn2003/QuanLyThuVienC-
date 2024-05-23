@@ -1,6 +1,7 @@
 ﻿
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuanLyThuVien.Data;
@@ -8,6 +9,8 @@ using QuanLyThuVien.Models;
 using QuanLyThuVien.Repositories;
 using QuanLyThuVien.Services;
 using System.Text;
+using QuanLyThuVien.Profiles;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<QuanLyThuVienContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("QuanLyThuVienContext") ?? throw new InvalidOperationException("Connection string 'QuanLyThuVienContext' not found.")));
@@ -52,6 +55,7 @@ builder.Services.AddScoped<IBorrowedBookService, BorrowedBookService>();
 
 builder.Services.AddScoped<IStatisticsBorrowedBookService, StatisticsBorrowedBookService>();
 
+
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(opt =>
 {
@@ -81,6 +85,7 @@ builder.Services.AddSwaggerGen(opt =>
         }
     });
 });
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
