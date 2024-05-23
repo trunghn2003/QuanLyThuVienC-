@@ -91,7 +91,8 @@ namespace QuanLyThuVien.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        [Authorize("admin")]
+        [Authorize(Roles = "admin")]
+
 
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -161,10 +162,17 @@ namespace QuanLyThuVien.Controllers
             public string Username { get; set; }
             public string Password { get; set; }
         }
-
+  
+    [HttpGet("Exists/{username}")]
+    public async Task<ActionResult<bool>> UsernameExists(string username)
+    {
+        return await _context.User.AnyAsync(u => u.Username == username);
+    }
         private bool UserExists(int id)
         {
             return _context.User.Any(e => e.UserID == id);
         }
+        
+        
     }
 }
